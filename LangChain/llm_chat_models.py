@@ -61,5 +61,83 @@ print(response)
 
 ##############PROMPTS
 
+prompt = """
 
+Summarize this text in one sentence:
+{text}
+"""
+
+llm = OpenAI()
+summary = llm(prompt.format(text='Some story on Apple Inc.'))
+print(summary)
+
+
+###########
+from langchain.prompts import PromptTemplate
+
+prompt_template = PromptTemplate.from_template(" Tell me a {adjective} joke about {content} ")
+
+formatted_prompt = prompt_template.format(adjective='funny',content='chickens')
+
+print(formatted_prompt)
+
+
+prompt_val = prompt_template.invoke({'adjective':'funny','content':'chickens'})
+prompt_val
+
+
+######### PROMPT Templating Example 2
+from langchain.prompts import ChatPromptTemplate
+from langchain_openai.chat_models import ChatOpenAI
+
+#Define a chatprompt template to translate text
+template = ChatPromptTemplate.from_message([
+    ('system','you are an english to french translator.'),
+    ('user','Translate this to French: {text}')
+])
+
+llm = ChatOpenAI()
+#Translate a joke about simpsons
+response = llm.invoke(template.format_message(text = 'tell me a joke on simpsons intergalactic journey'))
+print(response)
+
+
+
+#VertexAI
+from langchain_google_vertexai import ChatVertexAI
+from langchain import PromptTemplate,LLMChain
+
+llm = ChatVertexAI(model_name="gemini-pro")
+
+template = """Question: {question}
+Answer: Let's think step by step"""
+
+prompt = PromptTemplate(template=template, input_variables=['question'])
+llm_chain = LLMChain(prompt=prompt, llm=llm, verbose=True)
+question = "What is the root square of infinity"
+llm_chain.run(question)
+
+
+
+########### Langchain Expression Language
+
+from langchain_community.llms import HuggingFaceEndpoint
+from langchain.prompts import PromptTemplate
+from langchain.schema import StrOutputParser
+
+repo_id = "mistralai/Mistral-7B-Instruct-v0.2" 
+
+llm = HuggingFaceEndpoint(
+    repo_id=repo_id,
+    max_length=128,
+    temprature= 0.5
+)
+
+template = """Question: {question} Answer: Let's think step by step"""
+prompt = PromptTemplate.from_template(template)
+runnable = prompt|llm|StrOutputParser()
+
+question = 'Who won the last world cup'
+summary = runnable.invoke({'question':question})
+print(summary)
 
